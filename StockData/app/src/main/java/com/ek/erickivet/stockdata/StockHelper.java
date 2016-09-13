@@ -13,7 +13,7 @@ import android.util.Log;
 public class StockHelper extends SQLiteOpenHelper {
     private static final String TAG = StockHelper.class.getCanonicalName();
 
-    private static final int DATABASE_VERSION = 9;
+    private static final int DATABASE_VERSION = 17;
     public static final String DATABASE_NAME = "stockDB.db";
     public static final String STOCK_LIST_TABLE_NAME = StockContract.Stock.STOCK_LIST_TABLE_NAME;
 
@@ -26,9 +26,12 @@ public class StockHelper extends SQLiteOpenHelper {
     public static final String COL_STOCK_PERCENT = StockContract.Stock.COL_STOCK_PERCENT;
     public static final String COL_STOCK_TIMESTAMP = StockContract.Stock.COL_STOCK_TIMESTAMP;
     public static final String COL_STOCK_QUANTITY = StockContract.Stock.COL_STOCK_QUANTITY;
+    //addingline
+    public static final String COL_STOCK_VALUE = StockContract.Stock.COL_STOCK_VALUE;
 
-    public static final String [] STOCK_COLUMNS = {COL_ID,COL_STOCK_NAME,COL_STOCK_SYMBOL, COL_STOCK_EXCHANGE,
-            COL_STOCK_PRICE,COL_STOCK_CHANGE,COL_STOCK_PERCENT,COL_STOCK_TIMESTAMP,COL_STOCK_QUANTITY};
+    public static final String[] STOCK_COLUMNS = {COL_ID, COL_STOCK_NAME, COL_STOCK_SYMBOL, COL_STOCK_EXCHANGE,
+            COL_STOCK_PRICE, COL_STOCK_CHANGE, COL_STOCK_PERCENT, COL_STOCK_TIMESTAMP, COL_STOCK_QUANTITY,
+            COL_STOCK_VALUE};
 
     public static final String CREATE_STOCK_TABLE =
             "CREATE TABLE " + STOCK_LIST_TABLE_NAME + "(" + COL_ID +
@@ -40,20 +43,20 @@ public class StockHelper extends SQLiteOpenHelper {
                     COL_STOCK_CHANGE + " DOUBLE," +
                     COL_STOCK_PERCENT + " DOUBLE," +
                     COL_STOCK_TIMESTAMP + " TEXT," +
-                    COL_STOCK_QUANTITY + " DOUBLE" + ")";
+                    COL_STOCK_QUANTITY + " DOUBLE," +
+                    COL_STOCK_VALUE + " DOUBLE" + ")";
 
-    public StockHelper (Context context){
-        super(context, DATABASE_NAME,null,DATABASE_VERSION);
+    public StockHelper(Context context) {
+        super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
     private static StockHelper instance;
 
-    public static synchronized StockHelper getInstance(Context context){
-        if(instance == null)
+    public static synchronized StockHelper getInstance(Context context) {
+        if (instance == null)
             instance = new StockHelper(context.getApplicationContext());
         return instance;
     }
-
 
 
     @Override
@@ -68,35 +71,45 @@ public class StockHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public long addStock(ContentValues values){
+    public long addStock(ContentValues values) {
         SQLiteDatabase db = getWritableDatabase();
-        long insertedRow = db.insert(STOCK_LIST_TABLE_NAME,null,values);
+        long insertedRow = db.insert(STOCK_LIST_TABLE_NAME, null, values);
         db.close();
         return insertedRow;
     }
 
-    public Cursor getStockSymbol(String selection){
-        String [] projection = {COL_STOCK_SYMBOL};
+    public Cursor getStockSymbol(String selection) {
+        String[] projection = {COL_STOCK_SYMBOL};
 
         SQLiteDatabase db = getReadableDatabase();
-        Cursor cursor = db.query(STOCK_LIST_TABLE_NAME,projection,selection,null,null,null,null);
+        Cursor cursor = db.query(STOCK_LIST_TABLE_NAME, projection, selection, null, null, null, null);
         return cursor;
     }
 
-    public Cursor getStock(String selection){
+    public Cursor getStock(String selection) {
         String[] projection = STOCK_COLUMNS;
 
         SQLiteDatabase db = getReadableDatabase();
-        Cursor cursor = db.query(STOCK_LIST_TABLE_NAME,projection,selection,null,null,null,null);
+        Cursor cursor = db.query(STOCK_LIST_TABLE_NAME, projection, selection, null, null, null, null);
 
         return cursor;
     }
 
-    public int deleteStock(String id){
+    public int deleteStock(String id) {
         SQLiteDatabase db = getWritableDatabase();
 
-        int rowsDeleted = db.delete(STOCK_LIST_TABLE_NAME,COL_ID+"=?",new String[]{id});
+        int rowsDeleted = db.delete(STOCK_LIST_TABLE_NAME, COL_ID + "=?", new String[]{id});
         db.close();
         return rowsDeleted;
+    }
+
+    public double getValueSum() {
+        String[] projection = STOCK_COLUMNS;
+
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT SUM(Value) FROM STOCK", null);
+        if (cursor.moveToFirst()) {
+            return cursor.getDouble(0);
+        } else return 00.00;
     }
 }

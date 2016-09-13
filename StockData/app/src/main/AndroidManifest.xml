@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.ek.erickivet.stockdata">
 
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:allowBackup="true"
@@ -20,10 +20,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <provider
-            android:authorities="com.ek.erickivet.stockdata.StockContentProvider"
             android:name=".StockContentProvider"
-            android:exported="true"/>
+            android:authorities="com.ek.erickivet.stockdata.StockContentProvider"
+            android:exported="true" />
+
+        <activity android:name=".DetailActivity"></activity>
     </application>
 
 </manifest>

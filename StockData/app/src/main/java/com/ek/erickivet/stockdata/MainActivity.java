@@ -2,9 +2,11 @@ package com.ek.erickivet.stockdata;
 
 import android.content.ContentProvider;
 import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
@@ -45,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
     public static final Uri CONTENT_URI = StockContract.Stock.CONTENT_URI;
     ListView listview;
     CursorAdapter mCursorAdapter;
+    TextView portfolioValue;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,36 +71,75 @@ public class MainActivity extends AppCompatActivity {
             public void bindView(View view, Context context, Cursor cursor) {
                 TextView text1 = (TextView) view.findViewById(android.R.id.text1);
                 TextView text2 = (TextView) view.findViewById(android.R.id.text2);
+                portfolioValue = (TextView) findViewById(R.id.portfolio_value);
 
                 String name = cursor.getString(cursor.getColumnIndex("Name"));
                 String symbol = cursor.getString(cursor.getColumnIndex("Symbol"));
                 double quant = cursor.getDouble(cursor.getColumnIndex("Quantity"));
                 double price = cursor.getDouble(cursor.getColumnIndex("LastPrice"));
+                double value = cursor.getDouble(cursor.getColumnIndex("Value"));
+                //double value = (quant * price);
+
+
+
+                //double sum = value.
 
                 //text1.setText(name + " - " + symbol);
                 //text2.setText(quant + " - $" + price);
 
                 text1.setText(name + " - " + "(" + symbol + ")");
-                text2.setText(String.valueOf(quant) + " Shares @ " + "$" + String.valueOf(price));
+                text2.setText(String.valueOf(quant) + " Shares @ " + "$" + String.valueOf(price) +
+                "   Value: $" + String.valueOf(value));
+
+                portfolioValue.setText(String.valueOf(StockHelper.getInstance(context).getValueSum()));
+
+
             }
         };
 
-        listview.setAdapter(mCursorAdapter);
-        getContentResolver().registerContentObserver(CONTENT_URI,true,new Observer(new Handler()));
+        //listview.setAdapter(mCursorAdapter);
+        //getContentResolver().registerContentObserver(CONTENT_URI,true,new Observer(new Handler()));
 
         listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent intent = new Intent(MainActivity.this,DetailActivity.class);
+                intent.putExtra("COL_ID",id);
+                startActivity(intent);
 
             }
         });
 
         listview.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                return false;
+            public boolean onItemLongClick(final AdapterView<?> parent, final View view, int position, final long id) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(view.getContext());
+                builder.setTitle("Delete Stock");
+                builder.setMessage("Are You Sure You Want to Delete Stock?");
+                builder.setPositiveButton("DELETE", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        //getContentResolver().delete(ContentUris.withAppendedId(CONTENT_URI,id),null,null);
+                        StockHelper.getInstance(MainActivity.this).deleteStock(String.valueOf(id));
+                        //getLoaderManager().restartLoader(id,);
+                        //mCursorAdapter.notifyDataSetChanged();
+
+                    }
+                });
+                builder.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+                AlertDialog dialog = builder.create();
+                dialog.show();
+                return true;
             }
         });
+
+        listview.setAdapter(mCursorAdapter);
+        getContentResolver().registerContentObserver(CONTENT_URI,true,new Observer(new Handler()));
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -186,6 +228,8 @@ public class MainActivity extends AppCompatActivity {
                     values.put("Change",change);
                     values.put("ChangePercent",changePercent);
                     values.put("Timestamp",timeStamp);
+                    //adding line
+                    values.put("Value",Double.parseDouble(quant)*Double.parseDouble(price));
                     values.put("Exchange",exchange);
 
                     contentResolver.insert(CONTENT_URI,values);
@@ -254,6 +298,7 @@ public class MainActivity extends AppCompatActivity {
                 }).setNegativeButton("Cancel",new DialogInterface.OnClickListener(){
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
 
             }
         });

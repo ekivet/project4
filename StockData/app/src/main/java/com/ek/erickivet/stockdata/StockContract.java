@@ -21,6 +21,8 @@ public class StockContract {
         public static final String COL_STOCK_PERCENT = "ChangePercent";
         public static final String COL_STOCK_TIMESTAMP = "Timestamp";
         public static final String COL_STOCK_QUANTITY = "Quantity";
+        //addition
+        public static final String COL_STOCK_VALUE = "Value";
 
         public static final Uri CONTENT_URI = Uri.withAppendedPath(BASE_CONTENT_URI, "stock");
 
