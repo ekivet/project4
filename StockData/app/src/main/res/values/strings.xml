@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">StockData</string>
+    <string name="action_settings">Settings</string>
+    <string name="add_stock_dialog">Please Enter Stock Ticker Symbol and Quantity</string>
+    <string name="symbol">Symbol</string>
+    <string name="quantity">Quantity</string>
+
+</resources>
